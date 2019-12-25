@@ -3,4 +3,12 @@ services:
   warehouse:
     build: warehouse/.
     ports:
-      - "3000:3000"
+      - "3001:3000"
+  order:
+    build:  order/.
+    ports:
+      - "3002:3000"
+  payment:
+    build: payment/.
+    ports:
+      - "3003:3000"
