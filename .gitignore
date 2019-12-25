@@ -1,1 +1,7 @@
 node_modules/
+.DS_Store
+.idea
+.vscode
+order/node_modules
+warehouse/node_modules
+payment/node_modules
