@@ -7,6 +7,8 @@ const app = express()
 
 app.use(bodyParser.json())
 
+app.get('/ping', (req, res) => res.send('hello from payment'))
+
 app.post(`/user`, async (req, res) => {
   const result = await photon.users.create({
     data: {
