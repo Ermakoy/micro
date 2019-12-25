@@ -12,3 +12,7 @@ services:
     build: payment/.
     ports:
       - "3003:3000"
+  api-gateway:
+    build: apiGateway/.
+    ports:
+      - "3000:3000"
