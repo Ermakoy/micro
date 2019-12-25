@@ -9,6 +9,18 @@ app.use(bodyParser.json())
 
 app.get('/ping', (req, res) => res.send('hello from order'))
 
+app.get('/order', async (req, res) => {
+  const result = await photon.items.findMany({});
+
+  res.json(result)
+})
+
+app.get('/order/:id', async ({params}, res) => {
+  const result = await photon.items.findOne({id: params.id})
+
+  res.json(result)
+})
+
 app.post(`/user`, async (req, res) => {
   const result = await photon.users.create({
     data: {

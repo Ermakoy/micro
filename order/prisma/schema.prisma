@@ -8,19 +8,24 @@ generator photon {
   provider = "photonjs"
 }
 
-model User {
-  id    String  @default(cuid()) @id
-  email String  @unique
-  name  String?
-  posts Post[]
+enum OrderStatus {
+  COLLECTING
+  PAYED
+  SHIPPING
+  COMPLETE
+  FAILED
+  CANCELLED
 }
 
-model Post {
-  id        String   @default(cuid()) @id
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  published Boolean  @default(false)
-  title     String
-  content   String?
-  author    User
+model ItemRecord {
+  itemId String
+  amount Int
+}
+
+model Order {
+  id    String  @default(cuid()) @id
+  status OrderStatus
+  totalCost Int
+  totalAmount Int
+  itemDto ItemRecord[]
 }
