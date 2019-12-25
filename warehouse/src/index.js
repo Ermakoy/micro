@@ -85,6 +85,6 @@ app.get('/filterPosts', async (req, res) => {
   res.json(draftPosts)
 })
 
-const server = app.listen(3000, () =>
-  console.log('🚀 Warehouse Server ready'),
+const server = app.listen(3001, () =>
+  console.log('🚀 Warehouse Server ready', 3001),
 )

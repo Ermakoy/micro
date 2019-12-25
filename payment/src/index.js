@@ -85,8 +85,6 @@ app.get('/filterPosts', async (req, res) => {
   res.json(draftPosts)
 })
 
-const server = app.listen(3000, () =>
-  console.log(
-    '🚀 Server ready at: http://localhost:3000\n⭐️ See sample requests: http://pris.ly/e/js/rest-express#5-using-the-rest-api',
-  ),
+const server = app.listen(3003, () =>
+  console.log('Payment Server ready', 3003),
 )

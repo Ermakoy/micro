@@ -3,16 +3,16 @@ services:
   warehouse:
     build: warehouse/.
     ports:
-      - "3001:3000"
+      - "3001:3001"
   order:
-    build:  order/.
+    build: order/.
     ports:
-      - "3002:3000"
+      - "3002:3002"
   payment:
     build: payment/.
     ports:
-      - "3003:3000"
-  api-gateway:
+      - "3003:3003"
+  apigateway:
     build: apiGateway/.
     ports:
       - "3000:3000"
