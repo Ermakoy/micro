@@ -20,7 +20,7 @@ app.get('/ping-warehouse', async (req, res) => {
 
 app.get('/ping-order', async (req, res) => {
   try {
-    const {body} = await got('http://localhost:3002/ping')
+    const {body} = await got('http://order:3002/ping')
     res.send(body)
   } catch (e) {
     res.send(e.message)
@@ -29,7 +29,7 @@ app.get('/ping-order', async (req, res) => {
 
 app.get('/ping-payment', async (req, res) => {
   try {
-    const {bodyParser} = await got('http://localhost:3003/ping')
+    const {body} = await got('http://payment:3003/ping')
     res.send(body)
   } catch (e) {
     res.send(e.message)
