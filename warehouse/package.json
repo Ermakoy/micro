@@ -4,7 +4,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "node src/index.js",
-    "seed": "node prisma/seed.js"
+    "seed": "node prisma/seed.js",
+    "postinstall": "npx prisma2 generate"
   },
   "dependencies": {
     "@prisma/photon": "2.0.0-preview019",
