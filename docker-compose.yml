@@ -4,14 +4,17 @@ services:
     build: warehouse/.
     ports:
       - "3001:3001"
+    hostname: warehouse
   order:
     build: order/.
     ports:
       - "3002:3002"
+    hostname: order
   payment:
     build: payment/.
     ports:
       - "3003:3003"
+    hostname: payment
   apigateway:
     build: apiGateway/.
     ports:

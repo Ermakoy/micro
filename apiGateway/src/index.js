@@ -7,29 +7,30 @@ const app = express()
 app.use(bodyParser.json())
 
 
-app.use('/ping-warehouse', async (req, res) => {
+app.get('/ping-warehouse', async (req, res) => {
   try {
-    const res = await got('http://localhost:3001/ping')
-    res.send(res.body)
+    const {body} = await got('http://warehouse:3001/ping')
+    res.status(200).send(body)
+  } catch (e) {
+    console.log('We not here((')
+    res.status(500).send(e.message, 'warehouse host')
+  }
+})
+
+
+app.get('/ping-order', async (req, res) => {
+  try {
+    const {body} = await got('http://localhost:3002/ping')
+    res.send(body)
   } catch (e) {
     res.send(e.message)
   }
 })
 
-
-app.use('/ping-order', async (req, res) => {
+app.get('/ping-payment', async (req, res) => {
   try {
-    const res = await got('http://localhost:3002/ping')
-    res.send(res.body)
-  } catch (e) {
-    res.send(e.message)
-  }
-})
-
-app.use('/ping-payment', async (req, res) => {
-  try {
-    const res = await got('http://localhost:3003/ping')
-    res.send(res.body)
+    const {bodyParser} = await got('http://localhost:3003/ping')
+    res.send(body)
   } catch (e) {
     res.send(e.message)
   }
