@@ -2,6 +2,34 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const { Photon } = require('@prisma/photon')
 
+const amqp = require('amqplib/callback_api')
+
+let rabbitMqConnection = null
+
+const WAREHOUSE_PING_QUEUE = 'warehouse-ping'
+
+function connectToRabbit() {
+  amqp.connect('amqp://rabbitmq', function (err, conn) {
+    if (!conn) {
+        setTimeout(connectToRabbit, 1000)
+        return
+      }
+    conn.createChannel(function (err, channel) {
+      rabbitMqConnection = channel
+
+      rabbitMqConnection.assertQueue(WAREHOUSE_PING_QUEUE, {
+        durable: false
+      })
+
+      rabbitMqConnection.consume(WAREHOUSE_PING_QUEUE, (msg) => {
+        console.log('RECEIVED:', msg.content.toString())
+      })
+    });
+  });
+}
+
+connectToRabbit()
+
 const photon = new Photon()
 const app = express()
 

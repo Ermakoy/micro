@@ -19,3 +19,12 @@ services:
     build: apiGateway/.
     ports:
       - "3000:3000"
+  rabbitmq:
+    image: "rabbitmq:3-management"
+    hostname: "rabbit"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    labels:
+      NAME: "rabbitmq"
+    hostname: rabbitmq
