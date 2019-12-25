@@ -7,7 +7,7 @@ const app = express()
 app.use(bodyParser.json())
 
 
-app.use('/ping-warehouse', (req, res) => {
+app.use('/ping-warehouse', async (req, res) => {
   try {
     const res = await got('http://localhost:3001/ping')
     res.send(res.body)
@@ -17,7 +17,7 @@ app.use('/ping-warehouse', (req, res) => {
 })
 
 
-app.use('/ping-order', (req, res) => {
+app.use('/ping-order', async (req, res) => {
   try {
     const res = await got('http://localhost:3002/ping')
     res.send(res.body)
@@ -26,7 +26,7 @@ app.use('/ping-order', (req, res) => {
   }
 })
 
-app.use('/ping-payment', (req, res) => {
+app.use('/ping-payment', async (req, res) => {
   try {
     const res = await got('http://localhost:3003/ping')
     res.send(res.body)
