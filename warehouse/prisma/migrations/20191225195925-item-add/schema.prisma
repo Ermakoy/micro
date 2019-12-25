@@ -1,0 +1,16 @@
+datasource db {
+  provider = "sqlite"
+  url = "***"
+  default  = true
+}
+
+generator photon {
+  provider = "photonjs"
+}
+
+model Item {
+  id    String  @default(cuid()) @id
+  name String
+  amount Int @default(0)
+  price Int
+}
