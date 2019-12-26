@@ -16,7 +16,8 @@ curl localhost:3000/api/warehouse/items
 curl localhost:3000/api/warehouse/items/ck4ljnt7j0000rcc1xm6qd1m3
 curl -X POST -H 'Content-Type: application/json' -d '{"name": "Masalam3", "amount": 10, "price": 110}' localhost:3000/api/warehouse/items
 curl -X PUT localhost:3000/api/warehouse/items/ck4ljnt7j0000rcc1xm6qd1m3/addition/100
-
+curl localhost:3000/api/orders
+curl localhost:3000/api/orders/ck4mhwku10000q5c1sxivsov3
 ```
 
 
@@ -65,9 +66,9 @@ Input:
 Returns: коллекцию объектов представляющих заказ (OrderDto), обязательные поля: идентификатор (id: integer), статус заказа (status {COLLECTING, PAYED, SHIPPING, COMPLETE, FAILED, CANCELLED} : string/enum ), суммарная стоимость (totalCost: money), количество товаров в заказе (totalAmount: integer), идентификатор пользователя (username: string), коллекция объектов представляющих товар (ItemDto[]).
 Invariants:
 
-Name: Get order by id
-Method: GET
-Path: api/orders/{order_id}
+Name: **Get order by id**
+Method: `GET`
+Path: `api/orders/{order_id}`
 Parameters: not null {order_id} - идентификатор заказа
 Input:
 Returns:  OrderDto {id, status, username, totalCost, totalAmount, ItemDto[]} - актуальное состояние объекта.

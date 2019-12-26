@@ -91,7 +91,7 @@ app.get('/api/orders', async (req, res) => {
       });
 
       ok = ok.then(function(queue) {
-        ch.sendToQueue('rpc_queue', Buffer.from('get some orders неважно что тут'), {
+        ch.sendToQueue('rpc_queue', Buffer.from(JSON.stringify({params: req.params, body: req.body})), {
           correlationId: corrId, replyTo: queue
         });
       });
@@ -100,9 +100,42 @@ app.get('/api/orders', async (req, res) => {
     })
   }).catch(e => {
     console.log('Error in api', e)
-
   })
 })
+
+app.get('/api/orders/:id', async (req, res) => {
+  return connectToRabbitMQ().then(conn => {
+    conn.createChannel().then(ch => {
+      var corrId = uuid();
+
+      function maybeAnswer(msg) {
+        if (msg.properties.correlationId === corrId) {
+          res.send(msg.content.toString());
+        }
+      }
+
+      var ok = ch.assertQueue('', {exclusive: true})
+        .then(function(qok) { return qok.queue; });
+
+      ok = ok.then(function(queue) {
+        return ch.consume(queue, maybeAnswer, {noAck: true})
+          .then(function() { return queue; });
+      });
+
+      ok = ok.then(function(queue) {
+        ch.sendToQueue('rpc_queue2', Buffer.from(JSON.stringify({params: req.params, body: req.body})), {
+          correlationId: corrId, replyTo: queue
+        });
+      });
+
+      return ok
+    })
+  }).catch(e => {
+    console.log('Error in api', e)
+  })
+})
+
+
 // ---> apigateway ---> order create order, status not paid ---> payment ---> order, mark as paid ---> apigateway
 // app.get('/api/order/:orderId', async (req, res) => {
 //   try {

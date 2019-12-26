@@ -36,8 +36,35 @@ connectToRabbitMQ().then(function(conn) {
     });
 
     async function reply(msg) {
-      console.log(' [x] REPLY?', msg);
+      console.log(' [x] REPLY', msg.content.toString());
       const response = await photon.orders.findMany({});
+
+      ch.sendToQueue(msg.properties.replyTo,
+                    Buffer.from(JSON.stringify(response)),
+                    {correlationId: msg.properties.correlationId});
+      ch.ack(msg);
+    }
+  });
+}).catch(error => {
+  console.log('Error in order', error)
+});
+
+connectToRabbitMQ().then(function(conn) {
+  return conn.createChannel().then(function(ch) {
+    var q = 'rpc_queue2';
+    var ok = ch.assertQueue(q, {durable: false});
+    var ok = ok.then(function() {
+      ch.prefetch(1);
+      return ch.consume(q, reply);
+    });
+    return ok.then(function() {
+      console.log(' [x] Awaiting RPC requests');
+    });
+
+    async function reply(msg) {
+      console.log(' [x] REPLY', msg.content.toString());
+      const {params, body} = JSON.parse(msg.content.toString())
+      const response = await photon.orders.findOne({where: {id: params.id}})
 
       ch.sendToQueue(msg.properties.replyTo,
                     Buffer.from(JSON.stringify(response)),
