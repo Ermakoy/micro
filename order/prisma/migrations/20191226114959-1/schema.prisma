@@ -1,0 +1,32 @@
+datasource db {
+  provider = "sqlite"
+  url = "***"
+  default  = true
+}
+
+generator photon {
+  provider = "photonjs"
+}
+
+enum OrderStatus {
+  COLLECTING
+  PAYED
+  SHIPPING
+  COMPLETE
+  FAILED
+  CANCELLED
+}
+
+model ItemRecord {
+  id    String  @default(cuid()) @id
+  itemId String
+  amount Int
+}
+
+model Order {
+  id    String  @default(cuid()) @id
+  status OrderStatus
+  totalCost Int
+  totalAmount Int
+  itemDto ItemRecord[]
+}
