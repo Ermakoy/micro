@@ -76,6 +76,41 @@ connectToRabbitMQ().then(function(conn) {
   console.log('Error in order', error)
 });
 
+connectToRabbitMQ().then(function(conn) {
+  return conn.createChannel().then(function(ch) {
+    var q = 'change_order_status';
+    var ok = ch.assertQueue(q, {durable: false});
+    var ok = ok.then(function() {
+      ch.prefetch(1);
+      return ch.consume(q, reply);
+    });
+    return ok.then(function() {
+      console.log(' [x] Awaiting change_order_status requests');
+    });
+
+    async function reply(msg) {
+      console.log(' [x] REPLY change_order_status', msg.content.toString());
+      const {params, body} = JSON.parse(msg.content.toString())
+      console.log(`Set status ${params.status} to order with id ${params.orderId}`)
+      let response
+      try {
+        response = await photon.orders.update({where: {id: params.orderId}, data: {
+          status: params.status
+        }})
+      } catch (e) {
+        response = e
+      }
+      ch.sendToQueue(msg.properties.replyTo,
+                    Buffer.from(JSON.stringify(response)),
+                    {correlationId: msg.properties.correlationId});
+      ch.ack(msg);
+    }
+  });
+}).catch(error => {
+  console.log('Error in order', error)
+});
+
+
 const app = express()
 
 app.use(pino({prettyPrint: { colorize: true }}))

@@ -97,7 +97,7 @@ Invariants:
 статус заказа меняется в соответствие с машиной состояний в зависимости от результата вызова
 в случае неуспешной попытки количество доступных товаров, которые были включены в данный заказ, увеличивается на количество их в заказе
 
-Name: Change order status
+Name: **Change order status**
 Method: PUT
 Path: api/orders/{order_id}/status/{status}
 Parameters: not null {order_id} - идентификатор заказа, not null {status} - {COLLECTING, PAID, SHIPPING, COMPLETE, FAILED, CANCELLED} - статус, в который переводится заказ.

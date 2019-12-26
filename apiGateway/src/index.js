@@ -135,6 +135,38 @@ app.get('/api/orders/:id', async (req, res) => {
   })
 })
 
+app.put('/api/orders/:orderId/status/:status', async (req, res) => {
+  return connectToRabbitMQ().then(conn => {
+    conn.createChannel().then(ch => {
+      const corrId = uuid();
+
+      function maybeAnswer(msg) {
+        if (msg.properties.correlationId === corrId) {
+          res.send(msg.content.toString());
+        }
+      }
+
+      let ok = ch.assertQueue('', {exclusive: true})
+        .then(function(qok) { return qok.queue; });
+
+      ok = ok.then(function(queue) {
+        return ch.consume(queue, maybeAnswer, {noAck: true})
+          .then(function() { return queue; });
+      });
+
+      ok = ok.then(function(queue) {
+        ch.sendToQueue('change_order_status', Buffer.from(JSON.stringify({params: req.params, body: req.body})), {
+          correlationId: corrId, replyTo: queue
+        });
+      });
+
+      return ok
+    })
+  }).catch(e => {
+    console.log('Error in api', e)
+  })
+})
+
 
 // ---> apigateway ---> order create order, status not paid ---> payment ---> order, mark as paid ---> apigateway
 // app.get('/api/order/:orderId', async (req, res) => {
