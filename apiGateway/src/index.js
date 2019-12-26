@@ -1,5 +1,7 @@
 const express = require('express')
+const proxy = require('http-proxy-middleware')
 const bodyParser = require('body-parser')
+const pino = require('express-pino-logger')
 const got = require('got')
 const amqp = require('amqplib/callback_api')
 
@@ -31,24 +33,19 @@ connectToRabbit()
 
 const app = express()
 
-app.use(bodyParser.json())
+app.use(pino({prettyPrint: { colorize: true }}))
 
 /**  Get items => ItemDto<{id: number, name: string, amount: number, price: number}> */
-app.get('/api/warehouse/items', async (req, res) => {
-  try {
-    const {body} = await got('http://warehouse:3001/items')
-    res.status(200).send(body)
-  } catch (e) {
-    console.log('Error', e.message)
-    res.status(500).send(e.message)
-  }
-})
+app.use('/api/warehouse', proxy({ target: 'http://warehouse:3001', pathRewrite: {'^/api/warehouse' : ''} }))
+
+
+app.use(bodyParser.json())
 
 
 app.get('/ping-warehouse', async (req, res) => {
   try {
     const {body} = await got('http://warehouse:3001/ping')
-    res.status(200).send(body)
+    res.status(200).send('AAA' + body)
   } catch (e) {
     console.log('We not here((')
     res.status(500).send(e.message, 'warehouse host')
