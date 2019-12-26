@@ -18,6 +18,7 @@ enum OrderStatus {
 }
 
 model ItemRecord {
+  id    String  @default(cuid()) @id
   itemId String
   amount Int
 }
