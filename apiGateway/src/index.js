@@ -2,45 +2,56 @@ const express = require('express')
 const proxy = require('http-proxy-middleware')
 const bodyParser = require('body-parser')
 const pino = require('express-pino-logger')
+const serializers = require('pino-std-serializers')
 const got = require('got')
-const amqp = require('amqplib/callback_api')
+const amqp = require('amqplib')
 
 let rabbitMqConnection = null
 
 const WAREHOUSE_PING_QUEUE = 'warehouse-ping'
 
-function connectToRabbit() {
-  // return new Promise((resolve, reject) => {
-    amqp.connect('amqp://rabbitmq', function (err, conn) {
-      if (!conn) {
-        setTimeout(connectToRabbit, 1000)
-        return
-      }
-      conn.createChannel(function (err, channel) {
-        rabbitMqConnection = channel
-
-        rabbitMqConnection.assertQueue(WAREHOUSE_PING_QUEUE, {
-          durable: false
-        })
-
-        // resolve(channel)
-      });
-    });
-  // })
+const connectToRabbitMQ = async () => {
+  try {
+    rabbitMqConnection = await amqp.connect('amqp://rabbitmq')
+  } catch (e) {}
+  if (!rabbitMqConnection) {
+    setTimeout(connectToRabbitMQ, 1000)
+    return
+  }
 }
 
-connectToRabbit()
+connectToRabbitMQ()
 
 const app = express()
 
 app.use(pino({prettyPrint: { colorize: true }}))
 
-/**  Get items => ItemDto<{id: number, name: string, amount: number, price: number}> */
-app.use('/api/warehouse', proxy({ target: 'http://warehouse:3001', pathRewrite: {'^/api/warehouse' : ''} }))
+app.use((req, res, next) => {
+  rabbitMqConnection.createChannel().then(function(ch) {
+    var q = 'logs';
+    var msg = JSON.stringify(serializers.req(req));
 
+    var ok = ch.assertQueue(q, {durable: false});
+
+    return ok.then(function(_qok) {
+      // NB: `sentToQueue` and `publish` both return a boolean
+      // indicating whether it's OK to send again straight away, or
+      // (when `false`) that you should wait for the event `'drain'`
+      // to fire before writing again. We're just doing the one write,
+      // so we'll ignore it.
+      ch.sendToQueue(q, Buffer.from(msg));
+      console.log(" [x] Sent '%s'", msg);
+      // return ch.close();
+    });
+  })
+  next()
+})
+
+/**  Get items => ItemDto<{id: number, name: string, amount: number, price: number}> */
+app.use('/api/warehouse', proxy({ target: 'http://warehouse:3001', pathRewrite: {'^/api/warehouse' : ''}}))
+app.use('/api/orders', proxy({ target: 'http://order:3002', pathRewrite: {'^/api' : ''}}))
 
 app.use(bodyParser.json())
-
 
 app.get('/ping-warehouse', async (req, res) => {
   try {

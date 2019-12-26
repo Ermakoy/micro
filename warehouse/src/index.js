@@ -52,6 +52,8 @@ app.post('/items', json(({body}) => photon.items.create({data: body})))
 
 app.put('/items/:id', json(({params, body}) => photon.items.update({where: {id: params.id}, data: body})))
 
+app.put('/items/:id/addition/:amount', json(({params, body}) => photon.items.update({where: {id: params.id}, data: {amount: Number(params.amount)}})))
+
 app.delete('/items/:id', json(({params}) => photon.items.delete({where: {id: params.id}})))
 
 app.use((err, req, res, next) => {

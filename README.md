@@ -15,32 +15,33 @@ Password: `guest`
 curl localhost:3000/api/warehouse/items
 curl localhost:3000/api/warehouse/items/ck4ljnt7j0000rcc1xm6qd1m3
 curl -X POST -H 'Content-Type: application/json' -d '{"name": "Masalam3", "amount": 10, "price": 110}' localhost:3000/api/warehouse/items
+curl -X PUT localhost:3000/api/warehouse/items/ck4ljnt7j0000rcc1xm6qd1m3/addition/100
 
 ```
 
 
 ## API
 
-Name: `Get items`
-Method: GET
-Path: api/warehouse/items
+Name: **Get items**
+Method: `GET`
+Path: `api/warehouse/items`
 Parameters:
 Input:
 Returns: коллекцию объектов представляющих товар (ItemDto), обязательные поля: идентификатор (id: integer), наименование (name: string), количество доступных для заказа (amount: integer), цена (price: double precision)
 Invariants:
 
-Name: `Get item by id`
-Method: GET
-Path: api/warehouse/items/{item_id}
+Name: **Get item by id**
+Method: `GET`
+Path: `api/warehouse/items/{item_id}`
 Parameters: not null {item_id} - идентификатор товара
 Input:
 Returns:
 ItemDto {id, name, amount, price}
 Invariants:
 
-Name: `Create item`
-Method: POST
-Path: api/warehouse/items
+Name: **Create item**
+Method: `POST`
+Path: `api/warehouse/items`
 Parameters:
 Input: ItemCreationDto {name, amount, price}
 Returns:
@@ -48,17 +49,17 @@ ItemDto {id, name, amount, price}
 Invariants:
 До вызова объект не существует в базе данных, после вызова количество товаров с данным идентификатором становится равно amount
 
-Name: `Add existing items`
-Method: PUT
-Path: api/warehouse/items/{id}/addition/{amount}
+Name: **Add existing items**
+Method: `PUT`
+Path: `api/warehouse/items/{id}/addition/{amount}`
 Parameters: id - идентификатор товара, 0 > amount > 10_000 - количество добавляемых товаров
 Input:
 Returns: ItemDto {id, name, amount} - обновленное состояние объекта
 Invariants:
 
-Name: Get orders
-Method: GET
-Path: api/orders
+Name: **Get orders**
+Method: `GET`
+Path: `api/orders`
 Parameters:
 Input:
 Returns: коллекцию объектов представляющих заказ (OrderDto), обязательные поля: идентификатор (id: integer), статус заказа (status {COLLECTING, PAYED, SHIPPING, COMPLETE, FAILED, CANCELLED} : string/enum ), суммарная стоимость (totalCost: money), количество товаров в заказе (totalAmount: integer), идентификатор пользователя (username: string), коллекция объектов представляющих товар (ItemDto[]).
