@@ -1,0 +1,20 @@
+datasource db {
+  provider = "sqlite"
+  url = "***"
+  default  = true
+}
+
+generator photon {
+  provider = "photonjs"
+}
+
+enum PaymentStatus {
+  PENDING
+  DONE
+  REJECTED
+}
+
+model Payment {
+  id    String  @default(cuid()) @id
+  status PaymentStatus
+}
