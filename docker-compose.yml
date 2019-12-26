@@ -5,20 +5,32 @@ services:
     ports:
       - "3001:3001"
     hostname: warehouse
+    depends_on:
+      - rabbitmq
+
   order:
     build: order/.
     ports:
       - "3002:3002"
     hostname: order
+    depends_on:
+      - rabbitmq
+
   payment:
     build: payment/.
     ports:
       - "3003:3003"
     hostname: payment
+    depends_on:
+      - rabbitmq
+
   apigateway:
     build: apiGateway/.
     ports:
       - "3000:3000"
+    depends_on:
+      - rabbitmq
+      
   rabbitmq:
     image: "rabbitmq:3-management"
     hostname: "rabbit"

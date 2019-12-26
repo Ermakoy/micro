@@ -7,7 +7,7 @@ let rabbitMqConnection = null
 
 const WAREHOUSE_PING_QUEUE = 'warehouse-ping'
 
-function connectToRabbit() { 
+function connectToRabbit() {
   // return new Promise((resolve, reject) => {
     amqp.connect('amqp://rabbitmq', function (err, conn) {
       if (!conn) {
@@ -32,6 +32,17 @@ connectToRabbit()
 const app = express()
 
 app.use(bodyParser.json())
+
+/**  Get items => ItemDto<{id: number, name: string, amount: number, price: number}> */
+app.get('/api/warehouse/items', async (req, res) => {
+  try {
+    const {body} = await got('http://warehouse:3001/items')
+    res.status(200).send(body)
+  } catch (e) {
+    console.log('Error', e.message)
+    res.status(500).send(e.message)
+  }
+})
 
 
 app.get('/ping-warehouse', async (req, res) => {
