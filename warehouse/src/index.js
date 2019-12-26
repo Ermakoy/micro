@@ -2,36 +2,63 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const pino = require('express-pino-logger')
 const { Photon } = require('@prisma/photon')
-
-const amqp = require('amqplib/callback_api')
-
-let rabbitMqConnection = null
-
-const WAREHOUSE_PING_QUEUE = 'warehouse-ping'
-
-function connectToRabbit() {
-  amqp.connect('amqp://rabbitmq', function (err, conn) {
-    if (!conn) {
-        setTimeout(connectToRabbit, 1000)
-        return
-      }
-    conn.createChannel(function (err, channel) {
-      rabbitMqConnection = channel
-
-      rabbitMqConnection.assertQueue(WAREHOUSE_PING_QUEUE, {
-        durable: false
-      })
-
-      rabbitMqConnection.consume(WAREHOUSE_PING_QUEUE, (msg) => {
-        console.log('RECEIVED:', msg.content.toString())
-      })
-    });
-  });
-}
-
-connectToRabbit()
+const amqp = require('amqplib')
 
 const photon = new Photon()
+
+const delay = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
+
+const connectToRabbitMQ = async () => {
+  try {
+    const conn = await amqp.connect('amqp://rabbitmq')
+    return conn
+  } catch (e) {
+    if (e.code === 'ECONNREFUSED') {
+      console.log('Reconnecting...')
+    } else {
+      console.log('Error in order connect', e)
+    }
+    await delay(1000)
+    return connectToRabbitMQ()
+  }
+}
+
+connectToRabbitMQ().then(function(conn) {
+  return conn.createChannel().then(function(ch) {
+    let q = 'update_amount_of_items';
+    let ok = ch.assertQueue(q, {durable: false});
+    ok = ok.then(function() {
+      ch.prefetch(1);
+      return ch.consume(q, reply);
+    });
+    return ok.then(function() {
+      console.log(' [x] Awaiting update_amount_of_items requests');
+    });
+
+    async function reply(msg) {
+      console.log(' [x] REPLY update_amount_of_items', msg.content.toString());
+      const {params, body,replyQueue} = JSON.parse(msg.content.toString())
+      let response 
+      try {
+        // TODO: doesnt work ((((
+        //  const item = await photon.items.findOne({where: {id: params.id}})
+        //  console.log({item})
+        //  response = await photon.items.update({where: {id: params.id}, data: {amount: item.amount - 1}})
+      } catch (e) {
+        response = e
+        console.log(e)
+      }
+
+      ch.sendToQueue(replyQueue,
+                    Buffer.from(JSON.stringify({status: 'OK'})),
+                    {correlationId: msg.properties.correlationId});
+      ch.ack(msg);
+    }
+  });
+}).catch(error => {
+  console.log('Error in order', error)
+});
+
 const app = express()
 
 const json = fn => (req, res, next) => fn({params: req.params, body: req.body})

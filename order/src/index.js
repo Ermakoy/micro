@@ -4,6 +4,7 @@ const { Photon } = require('@prisma/photon')
 const amqp = require('amqplib')
 const pino = require('express-pino-logger')
 
+
 const photon = new Photon()
 
 const delay = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
@@ -109,6 +110,49 @@ connectToRabbitMQ().then(function(conn) {
 }).catch(error => {
   console.log('Error in order', error)
 });
+
+
+
+
+connectToRabbitMQ().then(function(conn) {
+  return conn.createChannel().then(function(ch) {
+    var q = 'add_item_to_order';
+    var ok = ch.assertQueue(q, {durable: false});
+    var ok = ok.then(function() {
+      ch.prefetch(1);
+      return ch.consume(q, reply);
+    });
+    return ok.then(function() {
+      console.log(' [x] Awaiting add_item_to_order requests');
+    });
+
+    async function reply(msg) {
+      console.log(' [x] REPLY add_item_to_order', msg.content.toString());
+      try {
+        const {params, body} = JSON.parse(msg.content.toString())
+          
+          // TODO: there is an error:
+          // const order = await photon.orders.findOne({where: {id: params.orderId}})
+          // response = await photon.orders.update({
+          //     where: {id: params.orderId},
+          //     data: {
+          //       itemDto: [...(order.itemDto || []), {itemId: params.itemId, amount: 1}]
+          //     }
+          // })
+          
+        ch.sendToQueue('update_amount_of_items',
+                    Buffer.from(JSON.stringify({params: { itemId: params.itemId, anoumt: -1 },
+                      replyQueue: msg.properties.replyTo})),
+                    {correlationId: msg.properties.correlationId});
+      } catch (e) {}
+        
+      ch.ack(msg);
+    }
+  });
+}).catch(error => {
+  console.log('Error in order', error)
+});
+
 
 
 const app = express()

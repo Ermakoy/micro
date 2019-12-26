@@ -74,11 +74,10 @@ Input:
 Returns:  OrderDto {id, status, username, totalCost, totalAmount, ItemDto[]} - актуальное состояние объекта.
 Invariants:
 
-Name: Add item to order
+Name: **Add item to order**
 Method: POST
-Path: api/orders/{order_id}/item
-Parameters: nullable {order_id} - идентификатор заказа
-Input: not null ItemAdditionParametersDto {id, 0< amount < 100, username}
+Path: api/orders/{order_id}/item/{item_id}
+Parameters: nullable {order_id} - идентификатор заказа, {item_id} - id of item to add
 Returns:
 OrderDto { id } - как минимум идентификатор заказа, которому была добавлена деталь.
 Invariants:
