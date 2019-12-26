@@ -112,7 +112,38 @@ connectToRabbitMQ().then(function(conn) {
 });
 
 
+connectToRabbitMQ().then(function(conn) {
+  return conn.createChannel().then(function(ch) {
+    let q = 'mark_order_as_payd';
+    let ok = ch.assertQueue(q, {durable: false});
+    ok = ok.then(function() {
+      ch.prefetch(1);
+      return ch.consume(q, reply);
+    });
+    return ok.then(function() {
+      console.log(' [x] Awaiting mark_order_as_payd requests');
+    });
 
+    async function reply(msg) {
+      console.log(' [x] REPLY mark_order_as_payd', msg.content.toString());
+      const {params, body,replyQueue} = JSON.parse(msg.content.toString())
+      let response
+      try {
+        response = await photon.orders.update({where: {id: params.orderId}, data: {status: 'PAYED'}})
+      } catch (e) {
+        response = e
+        console.log(e)
+      }
+
+      ch.sendToQueue(replyQueue,
+                    Buffer.from(JSON.stringify(response)),
+                    {correlationId: msg.properties.correlationId});
+      ch.ack(msg);
+    }
+  });
+}).catch(error => {
+  console.log('Error in order', error)
+});
 
 connectToRabbitMQ().then(function(conn) {
   return conn.createChannel().then(function(ch) {

@@ -85,7 +85,7 @@ Invariants:
 после вызова заказ содержит товары, которые содержал до вызова и новый товар с характеристиками, переданными в ItemAdditionParametersDto
 после вызова количество доступных товаров с данным идентификатором становится меньше на amount, но не может стать меньше нуля.
 
-Name: Perform payment
+Name:  **Perform payment**
 Method: PUT
 Path: api/orders/{order_id}/payment
 Parameters: not null {order_id} - идентификатор заказа
