@@ -1,35 +1,57 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const { Photon } = require('@prisma/photon')
-// const amqp = require('amqplib')
-
-// const getOrders = () => photon.orders.findMany({})
-
-// amqp.connect('amqp://rabbitmq').then(function(conn) {
-//   return conn.createChannel().then(function(ch) {
-//     var ok = ch.assertQueue('order', {durable: false});
-
-//     ok = ok.then(function(_qok) {
-//       return ch.consume('updateOrderStatus', msg => {
-//         console.log(" [x] Received '%s'", msg.content.toString())
-
-//         if (msg.content.toString() === 'get') {
-//           return photon.orders.findMany({}).then(result => {
-//             ch.sendToQueue('order', Buffer.from(result));
-//           })
-//         }
-
-//       }, {noAck: true});
-//     });
-
-//     return ok.then(function(_consumeOk) {
-//       console.log(' [*] Waiting for messages. To exit press CTRL+C');
-//     });
-//   });
-// }).catch(console.warn);
+const amqp = require('amqplib')
+const pino = require('express-pino-logger')
 
 const photon = new Photon()
+
+const delay = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
+
+const connectToRabbitMQ = async () => {
+  try {
+    const conn = await amqp.connect('amqp://rabbitmq')
+    return conn
+  } catch (e) {
+    if (e.code === 'ECONNREFUSED') {
+      console.log('Reconnecting...')
+    } else {
+      console.log('Error in order connect', e)
+    }
+    await delay(1000)
+    return connectToRabbitMQ()
+  }
+}
+
+connectToRabbitMQ().then(function(conn) {
+  return conn.createChannel().then(function(ch) {
+    var q = 'rpc_queue';
+    var ok = ch.assertQueue(q, {durable: false});
+    var ok = ok.then(function() {
+      ch.prefetch(1);
+      return ch.consume(q, reply);
+    });
+    return ok.then(function() {
+      console.log(' [x] Awaiting RPC requests');
+    });
+
+    async function reply(msg) {
+      console.log(' [x] REPLY?', msg);
+      const response = await photon.orders.findMany({});
+
+      ch.sendToQueue(msg.properties.replyTo,
+                    Buffer.from(JSON.stringify(response)),
+                    {correlationId: msg.properties.correlationId});
+      ch.ack(msg);
+    }
+  });
+}).catch(error => {
+  console.log('Error in order', error)
+});
+
 const app = express()
+
+app.use(pino({prettyPrint: { colorize: true }}))
 
 app.use(bodyParser.json())
 

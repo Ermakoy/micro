@@ -40,6 +40,8 @@ services:
     labels:
       NAME: "rabbitmq"
     hostname: rabbitmq
+    logging:
+      driver: none
 
   logs:
     build: logs/.

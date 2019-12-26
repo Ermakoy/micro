@@ -4,15 +4,18 @@ const delay = ms => new Promise((resolve, reject) => setTimeout(resolve, ms))
 
 const connectToRabbitMQ = async () => {
   try {
-    return amqp.connect('amqp://rabbitmq')
-  } catch (e) {}
-  if (!rabbitMqConnection) {
+    const conn = await amqp.connect('amqp://rabbitmq')
+    return conn
+  } catch (e) {
+    if (e.code === 'ECONNREFUSED') {
+      console.log('Reconnecting...')
+    } else {
+      console.log('Error in logs connect', e)
+    }
     await delay(1000)
     return connectToRabbitMQ()
   }
 }
-
-connectToRabbitMQ()
 
 connectToRabbitMQ().then(function(conn) {
   return conn.createChannel().then(function(ch) {

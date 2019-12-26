@@ -15,6 +15,7 @@
     "express-pino-logger": "^4.0.0",
     "got": "^10.2.0",
     "http-proxy-middleware": "^0.20.0",
+    "node-uuid": "^1.4.8",
     "pino-pretty": "^3.5.0"
   }
 }
