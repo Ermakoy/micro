@@ -22,7 +22,7 @@ app.get('/payment/:id', async (req,res) => {
 })
 
 app.post('/payment', async (req,res) => {
-  const result = await photon.payment.create(req.body);
+  const result = await photon.payment.create({data: req.body});
 
   res.json(result)
 })

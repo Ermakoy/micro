@@ -22,7 +22,7 @@ app.get('/orders/:id', async ({params}, res) => {
 })
 
 app.post('/orders', async (req,res) => {
-  const result = await photon.orders.create(req.body);
+  const result = await photon.orders.create({data: req.body});
 
   res.json(result)
 })

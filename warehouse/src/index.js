@@ -50,7 +50,7 @@ app.get('/items/:id', async (req,res) => {
 })
 
 app.post('/items', async (req,res) => {
-  const result = await photon.items.create(req.body);
+  const result = await photon.items.create({data: req.body});
 
   res.json(result)
 })
