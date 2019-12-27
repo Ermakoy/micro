@@ -18,6 +18,9 @@ curl -X POST -H 'Content-Type: application/json' -d '{"name": "Masalam3", "amoun
 curl -X PUT localhost:3000/api/warehouse/items/ck4ljnt7j0000rcc1xm6qd1m3/addition/100
 curl localhost:3000/api/orders
 curl localhost:3000/api/orders/ck4mhwku10000q5c1sxivsov3
+curl -X POST localhost:3000/api/orders/ck4mhwku10000q5c1sxivsov3/item/ck4ljnt7j0000rcc1xm6qd1m3
+curl -X PUT localhost:3000/api/orders/ck4mhwku10000q5c1sxivsov3/payment
+curl -X PUT localhost:3000/api/orders/ck4mhwku10000q5c1sxivsov3/status/COMPLETE
 ```
 
 
@@ -75,8 +78,8 @@ Returns:  OrderDto {id, status, username, totalCost, totalAmount, ItemDto[]} - �
 Invariants:
 
 Name: **Add item to order**
-Method: POST
-Path: api/orders/{order_id}/item/{item_id}
+Method: `POST`
+Path: `api/orders/{order_id}/item/{item_id}`
 Parameters: nullable {order_id} - идентификатор заказа, {item_id} - id of item to add
 Returns:
 OrderDto { id } - как минимум идентификатор заказа, которому была добавлена деталь.
@@ -86,8 +89,8 @@ Invariants:
 после вызова количество доступных товаров с данным идентификатором становится меньше на amount, но не может стать меньше нуля.
 
 Name:  **Perform payment**
-Method: PUT
-Path: api/orders/{order_id}/payment
+Method: `PUT`
+Path: `api/orders/{order_id}/payment`
 Parameters: not null {order_id} - идентификатор заказа
 Input: UserDetailsDto {username, cardAuthorizationInfo {AUTHORIZED, UNAUTHORIZED}: string/enum} - оплата производится в зависимости от статуса карты.
 Returns:
@@ -97,8 +100,8 @@ Invariants:
 в случае неуспешной попытки количество доступных товаров, которые были включены в данный заказ, увеличивается на количество их в заказе
 
 Name: **Change order status**
-Method: PUT
-Path: api/orders/{order_id}/status/{status}
+Method: `PUT`
+Path: `api/orders/{order_id}/status/{status}`
 Parameters: not null {order_id} - идентификатор заказа, not null {status} - {COLLECTING, PAID, SHIPPING, COMPLETE, FAILED, CANCELLED} - статус, в который переводится заказ.
 Input:
 Returns: OrderDto {id, status} - как минимум идентификатор и статус заказа

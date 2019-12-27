@@ -201,7 +201,7 @@ app.post('/api/orders/:orderId/item/:itemId', async (req, res) => {
   })
 })
 
-app.post('/api/orders/:orderId/payment', async (req, res) => {
+app.put('/api/orders/:orderId/payment', async (req, res) => {
   return connectToRabbitMQ().then(conn => {
     conn.createChannel().then(ch => {
       const corrId = uuid();

@@ -15,7 +15,7 @@ const connectToRabbitMQ = async () => {
     return conn
   } catch (e) {
     if (e.code === 'ECONNREFUSED') {
-      console.log('Reconnecting...')
+      // console.log('Reconnecting...')
     } else {
       console.log('Error in order connect', e)
     }
@@ -50,7 +50,7 @@ connectToRabbitMQ().then(function(conn) {
         // await photon.payment.create({data: {
         //   status: 'DONE',
         // }})
-        
+
         ch.sendToQueue('mark_order_as_payd',
                     Buffer.from(JSON.stringify({params: { orderId: params.orderId },
                       replyQueue: msg.properties.replyTo})),
@@ -58,7 +58,7 @@ connectToRabbitMQ().then(function(conn) {
       } catch (e) {
         console.log(e)
       }
-        
+
       ch.ack(msg);
     }
   });
