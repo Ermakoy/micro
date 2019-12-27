@@ -17,7 +17,7 @@ const connectToRabbitMQ = async () => {
     return conn
   } catch (e) {
     if (e.code === 'ECONNREFUSED') {
-      console.log('Reconnecting...')
+//      console.log('Reconnecting...')
     } else {
       console.log('Error in apiGateway connect', e)
     }
