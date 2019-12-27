@@ -9,7 +9,7 @@ docker-compose up --build
   Password: `guest`
 
 
-## Examples of usin API
+## Examples of using API
 
 ```
 curl localhost:3000/api/warehouse/items
