@@ -172,7 +172,7 @@ connectToRabbitMQ().then(function(conn) {
           // })
           
         ch.sendToQueue('update_amount_of_items',
-                    Buffer.from(JSON.stringify({params: { itemId: params.itemId, anoumt: -1 },
+                    Buffer.from(JSON.stringify({params: { id: params.itemId, amount: params.amount || 1 },
                       replyQueue: msg.properties.replyTo})),
                     {correlationId: msg.properties.correlationId});
       } catch (e) {}

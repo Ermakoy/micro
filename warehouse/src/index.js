@@ -41,9 +41,9 @@ connectToRabbitMQ().then(function(conn) {
       let response 
       try {
         // TODO: doesnt work ((((
-        //  const item = await photon.items.findOne({where: {id: params.id}})
-        //  console.log({item})
-        //  response = await photon.items.update({where: {id: params.id}, data: {amount: item.amount - 1}})
+         const item = await photon.items.findOne({where: {id: params.id}})
+         console.log({item})
+         response = await photon.items.update({where: {id: params.id}, data: {amount: item.amount - params.amount}})
       } catch (e) {
         response = e
         console.log(e)
