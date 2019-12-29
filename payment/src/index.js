@@ -47,12 +47,13 @@ connectToRabbitMQ().then(function(conn) {
         // Do some payment
 
         // TODO: TypeError: Cannot read property 'create' of undefined
-        // await photon.payment.create({data: {
-        //   status: 'DONE',
-        // }})
+        console.log('photon', photon)
+        const newPayment = await photon.payment.create({data: {
+          status: 'DONE',
+        }})
 
         ch.sendToQueue('mark_order_as_payd',
-                    Buffer.from(JSON.stringify({params: { orderId: params.orderId },
+                    Buffer.from(JSON.stringify({params: { orderId: params.orderId, paymentId: newPayment },
                       replyQueue: msg.properties.replyTo})),
                     {correlationId: msg.properties.correlationId});
       } catch (e) {
@@ -82,8 +83,9 @@ app.get('/payment/:id', async (req,res) => {
 })
 
 app.post('/payment', async (req,res) => {
-  const result = await photon.payment.create({data: req.body});
-
+  const result = await photon.payments.create({data: req.body});
+  
+  console.log('payment', result)
   res.json(result)
 })
 

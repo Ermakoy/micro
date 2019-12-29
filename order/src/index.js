@@ -1,4 +1,5 @@
 const express = require('express')
+const got = require('got');
 const bodyParser = require('body-parser')
 const { Photon } = require('@prisma/photon')
 const amqp = require('amqplib')
@@ -23,6 +24,34 @@ const connectToRabbitMQ = async () => {
     return connectToRabbitMQ()
   }
 }
+
+connectToRabbitMQ().then(connection =>
+  connection.createChannel().then(channel => {
+    let q = 'create_order';
+    var ok = channel.assertQueue(q, { durable: false });
+    var ok = ok.then(function() {
+      channel.prefetch(1);
+      return channel.consume(q, reply);
+    });
+    return ok.then(function() {
+      console.log(' [x] Awaiting create_order requests');
+    });
+
+    async function reply(msg) {
+      const {params, body} = JSON.parse(msg.content.toString())
+      console.log(' [x] Crete_order REPLY', msg.content.toString());
+      const payment = await got.post('http://payment:3003/payment')
+      console.log('creating order', payment,body.body)
+      const response = await photon.orders.create({data: {...body.body, paymentId: payment.id}});
+      console.log('i am new payment',payment)
+      channel.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(response)), {
+        correlationId: msg.properties.correlationId
+      });
+      channel.ack(msg);
+    }
+  })
+);
+
 
 connectToRabbitMQ().then(function(conn) {
   return conn.createChannel().then(function(ch) {
@@ -207,7 +236,8 @@ app.get('/orders/:id', async ({params}, res) => {
 })
 
 app.post('/orders', async (req,res) => {
-  const result = await photon.orders.create({data: req.body});
+  const {id} = await got.post('http://payment:3003/payment');
+  const result = await photon.orders.create({data: {...req.body, paymentId: id}});
 
   res.json(result)
 })

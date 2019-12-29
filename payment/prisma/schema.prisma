@@ -16,5 +16,5 @@ enum PaymentStatus {
 
 model Payment {
   id    String  @default(cuid()) @id
-  status PaymentStatus
+  status PaymentStatus @default(PENDING)
 }

@@ -71,6 +71,33 @@ app.get('/ping-warehouse', async (req, res) => {
   }
 })
 
+app.post('/api/orders',async (req,res) => {
+  const connection = await connectToRabbitMQ();
+  const channel = await connection.createChannel();
+  let corrId = uuid();
+  
+  function maybeAnswer(msg) {
+    if (msg.properties.correlationId === corrId) {
+      res.send(msg.content.toString());
+    }
+  }
+
+  let ok = channel
+              .assertQueue('',{exclusive: true})
+              .then(qok => qok.queue)
+              .then(queue => channel.consume(queue,maybeAnswer, {noAck: true}).then(() => queue))
+              .then(queue => channel.sendToQueue(
+                'create_order',
+                Buffer.from(JSON.stringify({params: req.params, body: req.body})),
+                {
+                  correlationId: corrId, replyTo: queue
+                }
+                ))
+              
+
+    return ok;
+})
+
 app.get('/api/orders', async (req, res) => {
   return connectToRabbitMQ().then(conn => {
     conn.createChannel().then(ch => {

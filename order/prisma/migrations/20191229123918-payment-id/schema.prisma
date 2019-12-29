@@ -1,6 +1,6 @@
 datasource db {
   provider = "sqlite"
-  url      = "file:dev.db"
+  url = "***"
   default  = true
 }
 
@@ -9,7 +9,6 @@ generator photon {
 }
 
 enum OrderStatus {
-  PENDING
   COLLECTING
   PAYED
   SHIPPING
@@ -26,7 +25,7 @@ model ItemRecord {
 
 model Order {
   id    String  @default(cuid()) @id
-  status OrderStatus @default(PENDING)
+  status OrderStatus
   totalCost Int
   totalAmount Int
   paymentId String
